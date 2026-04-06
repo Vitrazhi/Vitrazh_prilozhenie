@@ -2,120 +2,566 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Витраж — новая жизнь по осколкам</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/app.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Витраж — рисовые террасы</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg-start: #060812;
+      --bg-end: #1a082c;
+      --lead-dark: rgba(0, 0, 0, 0.92);
+      --lead-hi: rgba(255, 255, 255, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: calc(12px + env(safe-area-inset-top)) env(safe-area-inset-right) calc(16px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: #e8e4f0;
+      background: linear-gradient(145deg, var(--bg-start), var(--bg-end));
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.06'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+    h1 {
+      font-size: clamp(1.1rem, 4vw, 1.45rem);
+      font-weight: 600;
+      margin: 0 0 6px;
+      text-align: center;
+      z-index: 1;
+    }
+    .sub {
+      color: #9b94ab;
+      font-size: 0.85rem;
+      text-align: center;
+      max-width: 34rem;
+      margin: 0 12px 14px;
+      line-height: 1.45;
+      z-index: 1;
+    }
+    #wrap {
+      position: relative;
+      width: min(92vw, 720px);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(255, 255, 255, 0.06);
+      background: #000;
+      z-index: 1;
+    }
+    #glass {
+      display: block;
+      width: 100%;
+      height: auto;
+      vertical-align: middle;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .bar-wrap {
+      width: min(92vw, 720px);
+      margin-top: 16px;
+      z-index: 1;
+    }
+    .bar-track {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #5b21b6, #06b6d4, #22c55e);
+      transition: width 0.45s ease-out;
+    }
+    .stats {
+      margin: 8px 0 0;
+      font-size: 0.8rem;
+      color: #c4bdd4;
+      text-align: center;
+    }
+    #loading {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: #a89bc4;
+      text-align: center;
+      z-index: 1;
+    }
+    .file-row {
+      margin-top: 10px;
+      z-index: 1;
+      font-size: 0.8rem;
+      color: #9b94ab;
+    }
+    .file-row input { margin-top: 6px; max-width: min(92vw, 720px); }
+    #celebration {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 1000;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      opacity: 0;
+      animation: confettiFall var(--dur, 3.5s) ease-out forwards;
+    }
+    @keyframes confettiFall {
+      0% {
+        transform: translate(var(--sx), var(--sy)) rotate(0deg) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(var(--ex), var(--ey)) rotate(540deg) scale(0.4);
+        opacity: 0;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="app-bg" aria-hidden="true"></div>
-  <div id="app" class="app">
-    <header class="header">
-      <div class="logo">
-        <span class="logo-mark" aria-hidden="true"></span>
-        <div>
-          <h1 class="logo-title">Витраж</h1>
-          <p class="logo-sub">Собирайте привычки, как мозаику</p>
-        </div>
-      </div>
-      <button type="button" class="btn btn-ghost" id="btn-about" aria-label="О приложении">?</button>
-    </header>
-
-    <main class="main">
-      <section id="view-list" class="view view-list">
-        <div class="toolbar">
-          <h2 class="section-title">Ваши цели</h2>
-          <button type="button" class="btn btn-primary" id="btn-new-goal">Новая цель</button>
-        </div>
-        <ul id="goals-list" class="goals-list"></ul>
-        <p id="goals-empty" class="empty-hint hidden">Создайте первую цель — например, «наладить сон» — и добавьте ежедневные действия. Каждый день вы будете закрашивать осколки витража.</p>
-      </section>
-
-      <section id="view-goal" class="view view-goal hidden">
-        <div class="goal-header">
-          <button type="button" class="btn btn-back" id="btn-back">← К целям</button>
-          <div class="goal-title-block">
-            <h2 id="goal-title" class="goal-title"></h2>
-            <p id="goal-meta" class="goal-meta"></p>
-            <button type="button" class="btn btn-ghost btn-sm goal-delete" id="btn-delete-goal">Удалить цель</button>
-          </div>
-        </div>
-
-        <div class="glass-panel">
-          <div class="glass-frame">
-            <svg id="glass-svg" class="glass-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Витраж из осколков"></svg>
-            <div id="glass-hint" class="glass-hint"></div>
-          </div>
-          <div class="glass-legend">
-            <span id="glass-progress" class="glass-progress"></span>
-          </div>
-          <div class="goal-settings" id="goal-settings">
-            <label class="settings-field">
-              <span class="settings-label">Картинка витража</span>
-              <select id="goal-theme-select" class="settings-select" aria-label="Тема картинки витража"></select>
-            </label>
-            <label class="settings-toggle">
-              <input type="checkbox" id="toggle-daily-limit" />
-              <span class="settings-toggle-text">Не больше одного осколка на действие за день</span>
-            </label>
-          </div>
-        </div>
-
-        <div class="habits-block">
-          <h3 class="block-title">Действия на сегодня</h3>
-          <p class="block-desc" id="habits-block-desc">Выберите действие и нажмите на пустой осколок: откроется фрагмент картинки и оттенок привычки. С лимитом — один такой шаг на действие в день; без лимита можно собрать весь витраж за раз.</p>
-          <ul id="habits-list" class="habits-list"></ul>
-        </div>
-      </section>
-
-      <section id="view-form" class="view view-form hidden">
-        <button type="button" class="btn btn-back" id="btn-form-back">← Отмена</button>
-        <h2 class="section-title" id="form-title">Новая цель</h2>
-        <form id="goal-form" class="goal-form">
-          <label class="field">
-            <span class="field-label">Название цели</span>
-            <input type="text" name="title" required placeholder="Например: наладить сон" maxlength="120" />
-          </label>
-          <label class="field">
-            <span class="field-label">Заметка (необязательно)</span>
-            <textarea name="note" rows="2" placeholder="Что для вас важно в этой цели…" maxlength="400"></textarea>
-          </label>
-          <label class="field">
-            <span class="field-label">Тематическая картинка</span>
-            <select name="themeId" id="form-theme-select" class="field-select" aria-label="Тема витража"></select>
-            <span class="field-hint" style="margin-top: 0.35rem">Под осколками спрятана цельная иллюстрация — по мере закрашивания складывается сюжет.</span>
-          </label>
-          <label class="field toggle-form-field">
-            <span class="field-label">Режим закрашивания</span>
-            <span class="toggle-form-row">
-              <input type="checkbox" name="dailyLimit" id="form-daily-limit" checked />
-              <span>Не больше одного осколка на каждое действие в день</span>
-            </span>
-            <span class="field-hint" style="margin-top: 0.35rem">Снимите галочку, если хотите за один день закрасить весь витраж.</span>
-          </label>
-          <fieldset class="field habits-fieldset">
-            <legend class="field-label">Ежедневные действия</legend>
-            <p class="field-hint">До 8 пунктов. Каждое действие получит свой оттенок в витраже.</p>
-            <div id="habit-inputs" class="habit-inputs"></div>
-            <button type="button" class="btn btn-ghost btn-sm" id="btn-add-habit">+ Добавить действие</button>
-          </fieldset>
-          <button type="submit" class="btn btn-primary btn-wide">Создать витраж</button>
-        </form>
-      </section>
-    </main>
+  <h1>Витраж «Рисовые террасы»</h1>
+  <p class="sub">Сначала — свинцовая сетка и едва заметный силуэт; по клику каждый осколок открывает фрагмент снимка в стиле витража.</p>
+  <div id="wrap">
+    <canvas id="glass"></canvas>
   </div>
+  <div class="bar-wrap">
+    <div class="bar-track"><div class="bar-fill" id="barFill"></div></div>
+    <p class="stats" id="stats">0 / 0</p>
+  </div>
+  <p id="loading">Загрузка…</p>
+  <label class="file-row">
+    Свой файл (если нет <code>assets/vitrazh-rice.png</code>):
+    <input type="file" id="pickImage" accept="image/png,image/jpeg,image/webp" />
+  </label>
+  <div id="celebration" aria-hidden="true"></div>
 
-  <dialog id="modal-about" class="modal">
-    <div class="modal-inner">
-      <h3>О «Витраже»</h3>
-      <p>«Витраж» помогает строить новую жизнь по частям: вы задаёте цель, картинку и ежедневные действия. Выполнили действие — выберите его в списке и коснитесь пустого осколка: проявляется фрагмент тематической иллюстрации и цвет привычки.</p>
-      <p>Можно включить лимит «один осколок на действие в день» или снять его и собрать весь витраж за один раз. Данные хранятся только в вашем браузере.</p>
-      <button type="button" class="btn btn-primary" data-close-modal>Закрыть</button>
-    </div>
-  </dialog>
+  <script type="module">
+    import { Delaunay } from "https://cdn.jsdelivr.net/npm/d3-delaunay@6/+esm";
 
-  <script type="module" src="js/app.js"></script>
+    const IMAGE_SOURCE = "assets/vitrazh-rice.png";
+
+    const V_MIN = 20;
+    const V_MAX = 30;
+    const LEAD_PX = 3;
+    const FAINT_OPACITY = 0.1;
+    const MASK_RGB = "6, 8, 18";
+    const MASK_A = 0.94;
+    const STORAGE = "vitrazh_voro_";
+
+    const tg = typeof Telegram !== "undefined" && Telegram.WebApp ? Telegram.WebApp : null;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+      const c = tg.themeParams?.bg_color;
+      if (c) {
+        document.documentElement.style.setProperty("--bg-start", c);
+        document.documentElement.style.setProperty("--bg-end", c);
+        try {
+          tg.setHeaderColor(c);
+          tg.setBackgroundColor(c);
+        } catch (_) {}
+      }
+    }
+
+    const glassCanvas = document.getElementById("glass");
+    const ctx = glassCanvas.getContext("2d");
+    const barFillEl = document.getElementById("barFill");
+    const statsEl = document.getElementById("stats");
+    const loadingEl = document.getElementById("loading");
+    const celebrationEl = document.getElementById("celebration");
+    const wrapEl = document.getElementById("wrap");
+    const pickImage = document.getElementById("pickImage");
+
+    let imageSource = IMAGE_SOURCE;
+    let img = null;
+    let imgW = 0;
+    let imgH = 0;
+    let polygons = [];
+    let edges = [];
+    let revealed = [];
+    let sourceHash = "";
+    let keyGeom = "";
+    let keyProg = "";
+    let completionCelebrated = false;
+
+    function hashSource(str) {
+      let h = 0;
+      for (let i = 0; i < str.length; i++) {
+        h = (h << 5) - h + str.charCodeAt(i);
+        h |= 0;
+      }
+      return Math.abs(h).toString(16);
+    }
+
+    function mulberry32(a) {
+      return function () {
+        let t = (a += 0x6d2b79f5);
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    function loadImage(src) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error("load failed"));
+        if (!/^data:/i.test(src)) image.crossOrigin = "anonymous";
+        image.src = src;
+      });
+    }
+
+    function fallbackImage(w, h) {
+      const c = document.createElement("canvas");
+      c.width = w;
+      c.height = h;
+      const x = c.getContext("2d");
+      const g = x.createLinearGradient(0, 0, w, h);
+      g.addColorStop(0, "#1e3a2f");
+      g.addColorStop(0.5, "#3d2c1e");
+      g.addColorStop(1, "#87ceeb");
+      x.fillStyle = g;
+      x.fillRect(0, 0, w, h);
+      x.strokeStyle = "rgba(0,0,0,0.35)";
+      x.lineWidth = 3;
+      for (let i = 0; i < 12; i++) {
+        x.beginPath();
+        x.arc(w * 0.52, h * 0.48, 40 + i * 28, 0, Math.PI * 2);
+        x.stroke();
+      }
+      x.fillStyle = "rgba(255,255,255,0.25)";
+      x.font = `${Math.round(h * 0.04)}px sans-serif`;
+      x.textAlign = "center";
+      x.fillText("Укажите assets/vitrazh-rice.png или выберите файл ниже", w / 2, h / 2);
+      return c;
+    }
+
+    function cellCountFromSeed(seedHex) {
+      const seed = parseInt(seedHex.slice(-6) || "1", 16) || 1;
+      const r = mulberry32(seed);
+      return Math.floor(r() * (V_MAX - V_MIN + 1)) + V_MIN;
+    }
+
+    function generateSites(width, height, count, rand) {
+      const sites = [];
+      const pad = LEAD_PX * 3;
+      const col = Math.ceil(Math.sqrt(count));
+      const cw = (width - 2 * pad) / col;
+      const ch = (height - 2 * pad) / Math.ceil(count / col);
+      for (let i = 0; i < count; i++) {
+        const cc = i % col;
+        const cr = Math.floor(i / col);
+        const x = pad + cw * (cc + 0.5 + (rand() - 0.5) * 0.85);
+        const y = pad + ch * (cr + 0.5 + (rand() - 0.5) * 0.85);
+        sites.push([
+          Math.max(pad, Math.min(width - pad, x)),
+          Math.max(pad, Math.min(height - pad, y)),
+        ]);
+      }
+      return sites;
+    }
+
+    function lloydRelax(sites, width, height, iterations) {
+      let s = sites.map((p) => [p[0], p[1]]);
+      for (let it = 0; it < iterations; it++) {
+        const delaunay = Delaunay.from(s);
+        const voronoi = delaunay.voronoi([0, 0, width, height]);
+        const next = [];
+        for (let j = 0; j < s.length; j++) {
+          const poly = voronoi.cellPolygon(j);
+          if (!poly || poly.length < 3) {
+            next.push(s[j]);
+            continue;
+          }
+          let a = 0;
+          let cx = 0;
+          let cy = 0;
+          for (let k = 0; k < poly.length; k++) {
+            const p1 = poly[k];
+            const p2 = poly[(k + 1) % poly.length];
+            const cr = p1[0] * p2[1] - p2[0] * p1[1];
+            a += cr;
+            cx += (p1[0] + p2[0]) * cr;
+            cy += (p1[1] + p2[1]) * cr;
+          }
+          a *= 0.5;
+          if (Math.abs(a) < 1e-6) next.push(s[j]);
+          else next.push([cx / (6 * a), cy / (6 * a)]);
+        }
+        s = next;
+      }
+      return s;
+    }
+
+    function cellPolygonsFromSites(sites, width, height) {
+      const delaunay = Delaunay.from(sites);
+      const voronoi = delaunay.voronoi([0, 0, width, height]);
+      return Array.from(voronoi.cellPolygons(), (p) => Array.from(p));
+    }
+
+    function edgeKey(p1, p2) {
+      const [x1, y1] = p1;
+      const [x2, y2] = p2;
+      return x1 < x2 || (x1 === x2 && y1 < y2)
+        ? `${x1},${y1}|${x2},${y2}`
+        : `${x2},${y2}|${x1},${y1}`;
+    }
+
+    function uniqueEdges(polys) {
+      const m = new Map();
+      for (const poly of polys) {
+        for (let i = 0; i < poly.length; i++) {
+          const a = poly[i];
+          const b = poly[(i + 1) % poly.length];
+          m.set(edgeKey(a, b), { p1: a, p2: b });
+        }
+      }
+      return Array.from(m.values());
+    }
+
+    function pointInPolygon(pt, poly) {
+      const [x, y] = pt;
+      let inside = false;
+      for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+        const xi = poly[i][0];
+        const yi = poly[i][1];
+        const xj = poly[j][0];
+        const yj = poly[j][1];
+        const inter = yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi + 1e-12) + xi;
+        if (inter) inside = !inside;
+      }
+      return inside;
+    }
+
+    function findCell(clientX, clientY) {
+      const rect = glassCanvas.getBoundingClientRect();
+      const sx = (clientX - rect.left) * (glassCanvas.width / rect.width);
+      const sy = (clientY - rect.top) * (glassCanvas.height / rect.height);
+      for (let i = polygons.length - 1; i >= 0; i--) {
+        if (pointInPolygon([sx, sy], polygons[i])) return i;
+      }
+      return -1;
+    }
+
+    function confettiBurst() {
+      const colors = [
+        "#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4",
+        "#3b82f6", "#8b5cf6", "#d946ef", "#f43f5e",
+      ];
+      celebrationEl.innerHTML = "";
+      for (let i = 0; i < 90; i++) {
+        const el = document.createElement("div");
+        el.className = "confetti-piece";
+        el.style.background = colors[i % colors.length];
+        const x0 = Math.random() * window.innerWidth;
+        const y0 = -20 - Math.random() * 80;
+        el.style.setProperty("--sx", `${x0}px`);
+        el.style.setProperty("--sy", `${y0}px`);
+        el.style.setProperty("--ex", `${x0 + (Math.random() - 0.5) * 200}px`);
+        el.style.setProperty("--ey", `${window.innerHeight + 40}px`);
+        el.style.setProperty("--dur", `${2.8 + Math.random() * 2}s`);
+        celebrationEl.appendChild(el);
+      }
+    }
+
+    function loadProgress(total) {
+      try {
+        const raw = localStorage.getItem(keyProg);
+        if (!raw) return new Array(total).fill(false);
+        const p = JSON.parse(raw);
+        if (p.hash === sourceHash && Array.isArray(p.revealed) && p.revealed.length === total)
+          return p.revealed;
+      } catch (_) {}
+      return new Array(total).fill(false);
+    }
+
+    function saveProgress() {
+      localStorage.setItem(keyProg, JSON.stringify({ hash: sourceHash, revealed }));
+    }
+
+    function resizeCanvas() {
+      const w = wrapEl.clientWidth;
+      if (!imgW || !imgH) return;
+      const dispH = Math.round(imgH * (w / imgW));
+      glassCanvas.style.width = "100%";
+      glassCanvas.style.height = dispH + "px";
+      glassCanvas.width = imgW;
+      glassCanvas.height = imgH;
+    }
+
+    function draw() {
+      const W = glassCanvas.width;
+      const H = glassCanvas.height;
+      ctx.clearRect(0, 0, W, H);
+
+      ctx.save();
+      ctx.globalAlpha = FAINT_OPACITY;
+      ctx.drawImage(img, 0, 0, W, H);
+      ctx.restore();
+
+      polygons.forEach((poly, i) => {
+        if (!revealed[i]) return;
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(poly[0][0], poly[0][1]);
+        for (let j = 1; j < poly.length; j++) ctx.lineTo(poly[j][0], poly[j][1]);
+        ctx.closePath();
+        ctx.clip();
+        ctx.filter = "saturate(1.85) contrast(1.12) brightness(1.06)";
+        ctx.shadowColor = "rgba(120, 200, 255, 0.45)";
+        ctx.shadowBlur = 18;
+        ctx.drawImage(img, 0, 0, W, H);
+        ctx.restore();
+      });
+
+      polygons.forEach((poly, i) => {
+        if (revealed[i]) return;
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(poly[0][0], poly[0][1]);
+        for (let j = 1; j < poly.length; j++) ctx.lineTo(poly[j][0], poly[j][1]);
+        ctx.closePath();
+        ctx.fillStyle = `rgba(${MASK_RGB}, ${MASK_A})`;
+        ctx.fill();
+        ctx.restore();
+      });
+
+      edges.forEach(({ p1, p2 }) => {
+        ctx.beginPath();
+        ctx.moveTo(p1[0], p1[1]);
+        ctx.lineTo(p2[0], p2[1]);
+        ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--lead-dark").trim() || "rgba(0,0,0,0.92)";
+        ctx.lineWidth = LEAD_PX;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.stroke();
+        ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--lead-hi").trim() || "rgba(255,255,255,0.12)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      });
+    }
+
+    function updateUI() {
+      const total = polygons.length;
+      const n = revealed.filter(Boolean).length;
+      barFillEl.style.width = total ? `${(n / total) * 100}%` : "0%";
+      statsEl.textContent = `${n} / ${total}`;
+      loadingEl.textContent = "";
+
+      if (total && n === total) {
+        if (!completionCelebrated) {
+          completionCelebrated = true;
+          if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred("success");
+          confettiBurst();
+        }
+      } else completionCelebrated = false;
+    }
+
+    function onTap(clientX, clientY) {
+      const idx = findCell(clientX, clientY);
+      if (idx < 0 || revealed[idx]) return;
+      revealed[idx] = true;
+      saveProgress();
+      draw();
+      updateUI();
+      if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred("light");
+    }
+
+    glassCanvas.addEventListener("click", (e) => onTap(e.clientX, e.clientY));
+    glassCanvas.addEventListener(
+      "touchend",
+      (e) => {
+        e.preventDefault();
+        const t = e.changedTouches[0];
+        onTap(t.clientX, t.clientY);
+      },
+      { passive: false }
+    );
+
+    window.addEventListener("resize", () => {
+      resizeCanvas();
+      draw();
+    });
+
+    async function buildFromCurrentSource() {
+      loadingEl.textContent = "Загрузка изображения…";
+      sourceHash = hashSource(imageSource);
+      keyGeom = STORAGE + "geom_" + sourceHash;
+      keyProg = STORAGE + "prog_" + sourceHash;
+
+      try {
+        img = await loadImage(imageSource);
+      } catch (e) {
+        console.warn(e);
+        loadingEl.textContent = "Файл по умолчанию не найден — выберите PNG/JPG ниже или положите assets/vitrazh-rice.png";
+        img = fallbackImage(900, 675);
+      }
+
+      imgW = img.naturalWidth || img.width;
+      imgH = img.naturalHeight || img.height;
+      const targetN = cellCountFromSeed(sourceHash);
+
+      let sites = null;
+      try {
+        const g = localStorage.getItem(keyGeom);
+        if (g) {
+          const parsed = JSON.parse(g);
+          if (parsed.hash === sourceHash && Array.isArray(parsed.sites) && parsed.sites.length >= V_MIN && parsed.sites.length <= V_MAX)
+            sites = parsed.sites;
+        }
+      } catch (_) {}
+
+      if (!sites) {
+        loadingEl.textContent = "Раскладка витража…";
+        const seed = parseInt(sourceHash.slice(0, 8) || "1", 16) || 1;
+        sites = generateSites(imgW, imgH, targetN, mulberry32(seed));
+        sites = lloydRelax(sites, imgW, imgH, 6);
+        localStorage.setItem(keyGeom, JSON.stringify({ hash: sourceHash, sites }));
+      }
+
+      polygons = cellPolygonsFromSites(sites, imgW, imgH);
+      edges = uniqueEdges(polygons);
+      revealed = loadProgress(polygons.length);
+      saveProgress();
+
+      completionCelebrated = revealed.filter(Boolean).length === polygons.length;
+
+      resizeCanvas();
+      draw();
+      updateUI();
+    }
+
+    pickImage.addEventListener("change", (e) => {
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      imageSource = URL.createObjectURL(f);
+      buildFromCurrentSource().catch((err) => {
+        loadingEl.textContent = "Ошибка: " + (err && err.message);
+        console.error(err);
+      });
+    });
+
+    buildFromCurrentSource().catch((e) => {
+      loadingEl.textContent = "Ошибка: " + (e && e.message);
+      console.error(e);
+    });
+  </script>
 </body>
 </html>
