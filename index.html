@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Витраж — новая жизнь по осколкам</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+  <div class="app-bg" aria-hidden="true"></div>
+  <div id="app" class="app">
+    <header class="header">
+      <div class="logo">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <div>
+          <h1 class="logo-title">Витраж</h1>
+          <p class="logo-sub">Собирайте привычки, как мозаику</p>
+        </div>
+      </div>
+      <button type="button" class="btn btn-ghost" id="btn-about" aria-label="О приложении">?</button>
+    </header>
+
+    <main class="main">
+      <section id="view-list" class="view view-list">
+        <div class="toolbar">
+          <h2 class="section-title">Ваши цели</h2>
+          <button type="button" class="btn btn-primary" id="btn-new-goal">Новая цель</button>
+        </div>
+        <ul id="goals-list" class="goals-list"></ul>
+        <p id="goals-empty" class="empty-hint hidden">Создайте первую цель — например, «наладить сон» — и добавьте ежедневные действия. Каждый день вы будете закрашивать осколки витража.</p>
+      </section>
+
+      <section id="view-goal" class="view view-goal hidden">
+        <div class="goal-header">
+          <button type="button" class="btn btn-back" id="btn-back">← К целям</button>
+          <div class="goal-title-block">
+            <h2 id="goal-title" class="goal-title"></h2>
+            <p id="goal-meta" class="goal-meta"></p>
+            <button type="button" class="btn btn-ghost btn-sm goal-delete" id="btn-delete-goal">Удалить цель</button>
+          </div>
+        </div>
+
+        <div class="glass-panel">
+          <div class="glass-frame">
+            <svg id="glass-svg" class="glass-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Витраж из осколков"></svg>
+            <div id="glass-hint" class="glass-hint"></div>
+          </div>
+          <div class="glass-legend">
+            <span id="glass-progress" class="glass-progress"></span>
+          </div>
+          <div class="goal-settings" id="goal-settings">
+            <label class="settings-field">
+              <span class="settings-label">Картинка витража</span>
+              <select id="goal-theme-select" class="settings-select" aria-label="Тема картинки витража"></select>
+            </label>
+            <label class="settings-toggle">
+              <input type="checkbox" id="toggle-daily-limit" />
+              <span class="settings-toggle-text">Не больше одного осколка на действие за день</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="habits-block">
+          <h3 class="block-title">Действия на сегодня</h3>
+          <p class="block-desc" id="habits-block-desc">Выберите действие и нажмите на пустой осколок: откроется фрагмент картинки и оттенок привычки. С лимитом — один такой шаг на действие в день; без лимита можно собрать весь витраж за раз.</p>
+          <ul id="habits-list" class="habits-list"></ul>
+        </div>
+      </section>
+
+      <section id="view-form" class="view view-form hidden">
+        <button type="button" class="btn btn-back" id="btn-form-back">← Отмена</button>
+        <h2 class="section-title" id="form-title">Новая цель</h2>
+        <form id="goal-form" class="goal-form">
+          <label class="field">
+            <span class="field-label">Название цели</span>
+            <input type="text" name="title" required placeholder="Например: наладить сон" maxlength="120" />
+          </label>
+          <label class="field">
+            <span class="field-label">Заметка (необязательно)</span>
+            <textarea name="note" rows="2" placeholder="Что для вас важно в этой цели…" maxlength="400"></textarea>
+          </label>
+          <label class="field">
+            <span class="field-label">Тематическая картинка</span>
+            <select name="themeId" id="form-theme-select" class="field-select" aria-label="Тема витража"></select>
+            <span class="field-hint" style="margin-top: 0.35rem">Под осколками спрятана цельная иллюстрация — по мере закрашивания складывается сюжет.</span>
+          </label>
+          <label class="field toggle-form-field">
+            <span class="field-label">Режим закрашивания</span>
+            <span class="toggle-form-row">
+              <input type="checkbox" name="dailyLimit" id="form-daily-limit" checked />
+              <span>Не больше одного осколка на каждое действие в день</span>
+            </span>
+            <span class="field-hint" style="margin-top: 0.35rem">Снимите галочку, если хотите за один день закрасить весь витраж.</span>
+          </label>
+          <fieldset class="field habits-fieldset">
+            <legend class="field-label">Ежедневные действия</legend>
+            <p class="field-hint">До 8 пунктов. Каждое действие получит свой оттенок в витраже.</p>
+            <div id="habit-inputs" class="habit-inputs"></div>
+            <button type="button" class="btn btn-ghost btn-sm" id="btn-add-habit">+ Добавить действие</button>
+          </fieldset>
+          <button type="submit" class="btn btn-primary btn-wide">Создать витраж</button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="modal-about" class="modal">
+    <div class="modal-inner">
+      <h3>О «Витраже»</h3>
+      <p>«Витраж» помогает строить новую жизнь по частям: вы задаёте цель, картинку и ежедневные действия. Выполнили действие — выберите его в списке и коснитесь пустого осколка: проявляется фрагмент тематической иллюстрации и цвет привычки.</p>
+      <p>Можно включить лимит «один осколок на действие в день» или снять его и собрать весь витраж за один раз. Данные хранятся только в вашем браузере.</p>
+      <button type="button" class="btn btn-primary" data-close-modal>Закрыть</button>
+    </div>
+  </dialog>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
